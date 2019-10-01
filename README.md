@@ -1,3 +1,7 @@
+# Problema dos Voos
+
+Este projeto foi desenvolvido utilizando a framework do ReactJS, como trabalho para a disciplina de Inteligência Artificial II da UNITAU, por Felipe Passos, aluno do curso de Engenharia de Computação.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

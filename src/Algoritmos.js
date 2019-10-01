@@ -1,3 +1,6 @@
+import { testNameToKey } from "jest-snapshot/build/utils";
+import { Object } from "core-js";
+
 const voos_file = require("./Voos");
 
 const pessoas = [
@@ -11,6 +14,12 @@ const pessoas = [
 
 const destino = "GRU";
 const voos = voos_file.voos;
+
+const tipos = {
+  1: "Subida de Encosta",
+  2: "Tempera Simulada",
+  3: "Algoritmo Genetico"
+};
 
 function preencheDominio() {
   let dom = [];
@@ -257,6 +266,7 @@ function genetico(
 }
 
 function busca_aux(
+  tipo,
   repeticoes,
   dominio,
   func,
@@ -267,44 +277,100 @@ function busca_aux(
   param5
 ) {
   var resultado = [],
-    custos_ordenados = [];
+    custos = [];
   for (let i = 0; i < repeticoes; i++) {
     let aux = func(dominio, param1, param2, param3, param4, param5);
     resultado.push([custo(aux), aux]);
   }
-  resultado.sort();
   for (let i = 0; i < resultado.length; i++) {
-    custos_ordenados.push(resultado[i][0]);
+    custos.push(resultado[i][0]);
   }
+  resultado.sort();
 
-  var saida = {
-    melhor: resultado[0],
-    custos: custos_ordenados
-  };
+  var saida = [
+    resultado[0][0],
+    {
+      melhor: resultado[0][1],
+      custos: custos,
+      tipo: tipos[tipo]
+    }
+  ];
   return saida;
 }
 
-export function executa_busca(tipo) {
+export function executa_busca(inputs) {
+  const {
+    quantidade,
+    sub_enc_checkbox,
+    tem_sim_checkbox,
+    genetic_checkbox,
+    temp_tem_sim,
+    resf_tem_sim,
+    tam_populacao,
+    prob_mutacao,
+    elitismo,
+    num_geracoes
+  } = inputs;
   let dominio = preencheDominio();
-  let resultado = null;
-  switch (tipo) {
-    case 1:
-      resultado = busca_aux(10, dominio, subida_encosta);
-      break;
-    case 2:
-      resultado = busca_aux(10, dominio, temp_sim, 10000, 0.9, 1);
-      break;
-    case 3:
-      resultado = busca_aux(10, dominio, genetico, 15, 1, 0.2, 0.2, 100);
-      break;
-    default:
-      resultado = [1, 3, 3, 2, 7, 3, 6, 3, 2, 4, 5, 3];
-      break;
+  var resultados = [];
+
+  if (sub_enc_checkbox) {
+    resultados.push(busca_aux(1, quantidade, dominio, subida_encosta));
   }
+
+  if (tem_sim_checkbox) {
+    resultados.push(
+      busca_aux(2, quantidade, dominio, temp_sim, temp_tem_sim, resf_tem_sim, 1)
+    );
+  }
+
+  if (genetic_checkbox) {
+    resultados.push(
+      busca_aux(
+        3,
+        quantidade,
+        dominio,
+        genetico,
+        tam_populacao,
+        1,
+        prob_mutacao,
+        elitismo,
+        num_geracoes
+      )
+    );
+  }
+
+  var resultados_ordenados = [...resultados];
+  resultados_ordenados.sort();
+
+  var labels = [];
+  for (let i = 0; i < quantidade; i++) {
+    labels.push((i + 1).toString());
+  }
+
+  var datasets = [];
+  var ranking_horarios = [];
+  for (let i = 0; i < resultados_ordenados.length; i++) {
+    datasets.push({
+      label: resultados_ordenados[i][1].tipo,
+      backgroundColor: null,
+      borderColor: "white",
+      borderWidth: 2,
+      data: resultados_ordenados[i][1].custos
+    });
+    ranking_horarios.push({
+      cost: resultados_ordenados[i][0],
+      type: resultados_ordenados[i][1].tipo,
+      table: imprimir_horarios(resultados_ordenados[i][1].melhor)
+    });
+  }
+
   var saida = {
-    melhor_custo: resultado.melhor[0],
-    melhores_horarios: imprimir_horarios(resultado.melhor[1]),
-    arr_custos: resultado.custos
+    ranking_horarios: ranking_horarios,
+    grafico: {
+      labels: labels,
+      datasets: datasets
+    }
   };
   return saida;
 }

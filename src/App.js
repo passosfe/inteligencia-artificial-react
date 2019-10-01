@@ -1,71 +1,86 @@
 import React from "react";
 import "./App.css";
-import Telas from "./Telas";
+import { executa_busca } from "./Algoritmos";
+import Entradas from "./Entradas";
+import { Line } from "react-chartjs-2";
+import TableView from "./TableView";
 
 class App extends React.Component {
-  state = { opcao: "opcao1" };
+  constructor(props) {
+    super(props);
+    this.state = {
+      grafico: {
+        labels: [],
+        datasets: []
+      },
+      results: []
+    };
 
-  changeView(item) {
-    var oldItem = document.getElementById(this.state.opcao);
-    oldItem.classList.remove("active");
-    item.target.className = "item active";
-    this.setState({ opcao: item.target.id });
+    this.busca_solucao = this.busca_solucao.bind(this);
   }
+
+  busca_solucao(qtd) {
+    let resultado = executa_busca(qtd);
+
+    this.setState(
+      {
+        results: resultado.ranking_horarios
+      },
+      () => {
+        this.setState({
+          grafico: {
+            labels: resultado.grafico.labels,
+            datasets: resultado.grafico.datasets
+          }
+        });
+      }
+    );
+  }
+
+  setGradientColor = (canvas, topcolor, bottomcolor) => {
+    const ctx = canvas.getContext("2d");
+    const gradient = ctx.createLinearGradient(0, 0, 0, 500);
+    gradient.addColorStop(0, bottomcolor);
+    gradient.addColorStop(1, topcolor);
+    return gradient;
+  };
+
+  getChartData = (canvas) => {
+    var grafico = this.state.grafico;
+    if (grafico.datasets) {
+      const top_colors = [
+        "rgba(25, 0, 255, 0.75)",
+        "rgba(255, 0, 200, 0.7)",
+        "rgba(55, 140, 25, 0.9)"
+      ];
+      const bottom_colors = [
+        "rgba(50, 150, 255, 0.9)",
+        "rgba(255, 50, 255, 0.9)",
+        "rgba(133, 255, 144, 0.85)"
+      ];
+      grafico.datasets.forEach((set, i) => {
+        set.backgroundColor = this.setGradientColor(
+          canvas,
+          top_colors[i],
+          bottom_colors[i]
+        );
+        i++;
+      });
+    }
+    return grafico;
+  };
 
   render() {
     return (
       <div>
         <div>
           <h1>Trabalho de Inteligência Artificial</h1>
-          <h3>Escolha a opção desejada:</h3>
-          <div className="entradas">
-            <div className="ui input">
-              <input type="text" placeholder="Quantidade"></input>
-            </div>
-            <button className="ui button">Calcular</button>
-          </div>
-        </div>
-        <div className="menu">
-          <div className="ui five item menu">
-            <a
-              id="opcao1"
-              className="item active"
-              onClick={(param) => this.changeView(param)}
-            >
-              Subida de Encosta
-            </a>
-            <a
-              id="opcao2"
-              className="item"
-              onClick={(param) => this.changeView(param)}
-            >
-              Subida de Encosta com Tentativas
-            </a>
-            <a
-              id="opcao3"
-              className="item"
-              onClick={(param) => this.changeView(param)}
-            >
-              Têmpera Simulada
-            </a>
-            <a
-              id="opcao4"
-              className="item"
-              onClick={(param) => this.changeView(param)}
-            >
-              Algoritmos Genéticos
-            </a>
-            <a
-              id="opcao5"
-              className="item"
-              onClick={(param) => this.changeView(param)}
-            >
-              Análise
-            </a>
-          </div>
+          <h3>Preencha as opções necessárias</h3>
+          <Entradas busca={this.busca_solucao}></Entradas>
         </div>
         <div className="resultado">
-          <Telas tipo={this.state.opcao}></Telas>
+          <TableView data={this.state.results}></TableView>
+          <Line options={{ responsive: true }} data={this.getChartData}></Line>
         </div>
       </div>
     );
