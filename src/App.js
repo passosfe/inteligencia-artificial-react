@@ -80,7 +80,12 @@ class App extends React.Component {
         </div>
         <div className="resultado">
           <TableView data={this.state.results}></TableView>
-          <Line options={{ responsive: true }} data={this.getChartData}></Line>
+          <div hidden={this.state.grafico.datasets.length === 0 ? true : false}>
+            <Line
+              options={{ responsive: true }}
+              data={this.getChartData}
+            ></Line>
+          </div>
         </div>
       </div>
     );

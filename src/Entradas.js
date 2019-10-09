@@ -1,5 +1,6 @@
 import React from "react";
 import validate from "./LoginFormValidationRules";
+import "./Entradas.css";
 
 class Entradas extends React.Component {
   constructor(props) {
@@ -79,6 +80,7 @@ class Entradas extends React.Component {
               <div className="ui toggle checkbox">
                 <input
                   type="checkbox"
+                  className="checkbox"
                   name="sub_enc_checkbox"
                   defaultChecked={true}
                   value={this.state.sub_enc_checkbox}
@@ -117,17 +119,16 @@ class Entradas extends React.Component {
                   onChange={this.handleChange}
                 ></input>
               </div>
-              <div className="field">
-                <div className="ui toggle checkbox">
-                  <input
-                    type="checkbox"
-                    name="tem_sim_checkbox"
-                    defaultChecked={true}
-                    value={this.state.tem_sim_checkbox}
-                    onClick={this.handleToggle}
-                  ></input>
-                  <label>Habilitar/Desabilitar</label>
-                </div>
+              <div className="ui toggle checkbox">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  name="tem_sim_checkbox"
+                  defaultChecked={true}
+                  value={this.state.tem_sim_checkbox}
+                  onClick={this.handleToggle}
+                ></input>
+                <label>Habilitar/Desabilitar</label>
               </div>
             </div>
             <div className="field">
@@ -189,6 +190,7 @@ class Entradas extends React.Component {
               <div className="ui toggle checkbox">
                 <input
                   type="checkbox"
+                  className="checkbox"
                   name="genetic_checkbox"
                   defaultChecked={true}
                   value={this.state.genetic_checkbox}
@@ -207,6 +209,7 @@ class Entradas extends React.Component {
                 <input
                   type="number"
                   name="quantidade"
+                  className="input_qtd"
                   placeholder="Quantidade"
                   value={this.state.quantidade}
                   onChange={this.handleChange}
