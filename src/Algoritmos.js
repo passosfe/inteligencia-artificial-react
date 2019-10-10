@@ -49,14 +49,15 @@ const tipos = {
 
 function imprimir_paradas(info, paradas) {
   const { distancias, passageiros, pontos } = info;
-  var tempo;
-  let passageiros_aux = [...passageiros];
-  var passageiros_embarcados = 0;
+  let tempo;
+  let passageiros_aux = JSON.parse(JSON.stringify(passageiros));
+  let passageiros_embarcados = 0;
+  let resposta = [];
 
   for (var i = 0; i < paradas.length; i++) {
     let indice;
     let tipo;
-    let tempo_excedente;
+    var tempo_excedente = "";
 
     i !== 0
       ? (tempo += distancias[`${pontos[paradas[i - 1]]}_${pontos[paradas[i]]}`])
@@ -81,7 +82,7 @@ function imprimir_paradas(info, paradas) {
       tipo = "Desembarcou";
 
       if (typeof passageiros_aux[indice].saiu !== "undefined") {
-        passageiros_aux[indice].saiu = "erro";
+        passageiros_aux[indice].saiu = true;
         passageiros_embarcados--;
         const { chegada_esperada } = passageiros_aux[indice];
 
@@ -92,12 +93,18 @@ function imprimir_paradas(info, paradas) {
     let passageiro = indice;
     let local = pontos[paradas[i]];
 
-    console.log(
-      `${passageiro} \t ${local} \t ${tipo} \t ${tempo} \t ${passageiros_embarcados} \t ${
-        tempo_excedente ? tempo_excedente : ""
-      }`
-    );
+    //if (!passageiros_aux[indice].saiu) {
+    resposta.push({
+      passageiro,
+      local,
+      tipo,
+      tempo,
+      passageiros_embarcados,
+      tempo_excedente
+    });
+    //}
   }
+  return resposta;
 }
 
 function preenche_distancias() {
@@ -246,7 +253,7 @@ function subida_encosta(info) {
       }
     }
 
-    melhor == atual ? (encontrado = true) : (encontrado = false);
+    melhor === atual ? (encontrado = true) : (encontrado = false);
   }
 
   return resposta;
@@ -392,7 +399,7 @@ function busca_aux(
   for (let i = 0; i < resultado.length; i++) {
     custos.push(resultado[i][0]);
   }
-  resultado.sort();
+  resultado.sort((a, b) => a[0] - b[0]);
 
   var saida = [
     resultado[0][0],
@@ -450,7 +457,7 @@ export function executa_busca(inputs) {
   }
 
   var resultados_ordenados = [...resultados];
-  resultados_ordenados.sort();
+  resultados_ordenados.sort((a, b) => a[0] - b[0]);
 
   var labels = [];
   for (let i = 0; i < quantidade; i++) {
@@ -458,7 +465,7 @@ export function executa_busca(inputs) {
   }
 
   var datasets = [];
-  var ranking_horarios = [];
+  var ranking_caminhos = [];
   for (let i = 0; i < resultados_ordenados.length; i++) {
     datasets.push({
       label: resultados_ordenados[i][1].tipo,
@@ -467,28 +474,19 @@ export function executa_busca(inputs) {
       borderWidth: 2,
       data: resultados_ordenados[i][1].custos
     });
-    ranking_horarios.push({
+    ranking_caminhos.push({
       cost: resultados_ordenados[i][0],
       type: resultados_ordenados[i][1].tipo,
-      table: imprimir_horarios(resultados_ordenados[i][1].melhor)
+      table: imprimir_paradas(info, resultados_ordenados[i][1].melhor)
     });
   }
 
   var saida = {
-    ranking_horarios: ranking_horarios,
+    ranking_caminhos: ranking_caminhos,
     grafico: {
       labels: labels,
       datasets: datasets
     }
   };
   return saida;
-}
-
-function main() {
-  let melhor = genetico(15, 0.2, 0.2, 100);
-
-  let custom = custo(melhor);
-
-  console.log(custom);
-  imprimir(melhor);
 }

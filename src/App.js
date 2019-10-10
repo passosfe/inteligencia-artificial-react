@@ -13,7 +13,8 @@ class App extends React.Component {
         labels: [],
         datasets: []
       },
-      results: []
+      results: [],
+      visible: true
     };
 
     this.busca_solucao = this.busca_solucao.bind(this);
@@ -24,7 +25,7 @@ class App extends React.Component {
 
     this.setState(
       {
-        results: resultado.ranking_horarios
+        results: resultado.ranking_caminhos
       },
       () => {
         this.setState({
@@ -70,14 +71,34 @@ class App extends React.Component {
     return grafico;
   };
 
+  handleScroll = () => {
+    let visible;
+
+    window.pageYOffset === 0 ? (visible = true) : (visible = false);
+
+    this.setState({
+      visible
+    });
+  };
+
+  componentDidMount() {
+    window.addEventListener("scroll", this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
+  }
+
   render() {
     return (
       <div>
-        <div>
+        <nav
+          className={`navbar ${!this.state.visible ? "navbar--hidden" : ""}`}
+        >
           <h1>Trabalho de Inteligência Artificial</h1>
           <h3>Preencha as opções necessárias</h3>
           <Entradas busca={this.busca_solucao}></Entradas>
-        </div>
+        </nav>
         <div className="resultado">
           <TableView data={this.state.results}></TableView>
           <div hidden={this.state.grafico.datasets.length === 0 ? true : false}>

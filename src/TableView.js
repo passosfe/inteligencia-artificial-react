@@ -1,5 +1,6 @@
 import React from "react";
 import { Object } from "core-js";
+import "./TableView.css";
 
 class TableView extends React.Component {
   constructor(props) {
@@ -12,28 +13,20 @@ class TableView extends React.Component {
     };
 
     this.head = this.head.bind(this);
-    this.verifyEmpty = this.verifyEmpty.bind(this);
-  }
-
-  verifyEmpty(target) {
-    return;
   }
 
   componentWillReceiveProps() {
-    console.log(this.props);
     const places = Object.keys(this.state);
     for (let i = 0; i < places.length; i++) {
       if (this.props.data[i]) {
         let table_results = this.props.data[i].table.map((item) => (
-          <tr>
-            <td>{item.nome}</td>
-            <td>{item.origem}</td>
-            <td>{item.ida_hora_saida}</td>
-            <td>{item.ida_hora_chegada}</td>
-            <td>{`R$${item.ida_preco},00`}</td>
-            <td>{item.volta_hora_saida}</td>
-            <td>{item.volta_hora_chegada}</td>
-            <td>{`R$${item.volta_preco},00`}</td>
+          <tr className={item.tipo}>
+            <td>{item.passageiro}</td>
+            <td>{item.local}</td>
+            <td>{item.tipo}</td>
+            <td>{item.tempo}</td>
+            <td>{item.passageiros_embarcados}</td>
+            <td>{item.tempo_excedente}</td>
           </tr>
         ));
         let place_result = {
@@ -51,14 +44,12 @@ class TableView extends React.Component {
   head() {
     return (
       <tr>
-        <th>Nome</th>
-        <th>Origem</th>
-        <th>Hora Ida (Saida)</th>
-        <th>Hora Ida (Chegada)</th>
-        <th>Preco Ida</th>
-        <th>Hora Volta (Saida)</th>
-        <th>Hora Volta (Chegada)</th>
-        <th>Preco Volta</th>
+        <th>Passageiro</th>
+        <th>Local</th>
+        <th>Tipo</th>
+        <th>Tempo Decorrido</th>
+        <th>Passageiros no Carro</th>
+        <th>Tempo Excedente</th>
       </tr>
     );
   }
