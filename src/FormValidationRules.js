@@ -8,7 +8,8 @@ export default function validate(values) {
     elitismo,
     num_geracoes,
     tem_sim_checkbox,
-    genetic_checkbox
+    genetic_checkbox,
+    best_param
   } = values;
   let errors = {};
   if (tem_sim_checkbox) {
@@ -19,8 +20,7 @@ export default function validate(values) {
       errors.temp_tem_sim =
         "Temperatura da Têmpera Simulada não pode ser negativa";
     }
-  }
-  if (tem_sim_checkbox) {
+
     if (!resf_tem_sim) {
       errors.resf_tem_sim =
         "Resfriamento da Têmpera Simulada não pode estar vazia";
@@ -29,7 +29,7 @@ export default function validate(values) {
         "Resfriamento da Têmpera Simulada deve estar entre 0 e 1";
     }
   }
-  if (genetic_checkbox) {
+  if (genetic_checkbox && !best_param) {
     if (!tam_populacao) {
       errors.tam_populacao =
         "Tamanho da População do Algoritmo Genético não pode estar vazia";
@@ -37,8 +37,7 @@ export default function validate(values) {
       errors.tam_populacao =
         "Tamanho da População do Algoritmo Genético não pode ser menor que 0";
     }
-  }
-  if (genetic_checkbox) {
+
     if (!prob_mutacao) {
       errors.prob_mutacao =
         "Probabilidade de Mutação do Algoritmo Genético não pode estar vazia";
@@ -46,15 +45,13 @@ export default function validate(values) {
       errors.prob_mutacao =
         "Probabilidade de Mutação do Algoritmo Genético deve estar entre 0 e 1";
     }
-  }
-  if (genetic_checkbox) {
+
     if (!elitismo) {
       errors.elitismo = "Elitismo do Algoritmo Genético não pode estar vazia";
     } else if (elitismo <= 0 || elitismo >= 1) {
       errors.elitismo = "Elitismo do Algoritmo Genético deve estar entre 0 e 1";
     }
-  }
-  if (genetic_checkbox) {
+
     if (!num_geracoes) {
       errors.num_geracoes =
         "Número de Gerações do Algoritmo Genético não pode estar vazia";

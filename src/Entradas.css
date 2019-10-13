@@ -1,6 +1,11 @@
-.field,
-.checkbox,
-.button,
-.input.qtd {
-  padding-top: 10px;
+.checkbox {
+  margin-bottom: 10px;
+}
+
+.field_quantidades {
+  margin-top: 35px;
+}
+
+.first_line {
+  margin-bottom: 10px;
 }

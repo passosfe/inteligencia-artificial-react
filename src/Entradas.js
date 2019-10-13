@@ -1,5 +1,5 @@
 import React from "react";
-import validate from "./LoginFormValidationRules";
+import validate from "./FormValidationRules";
 import "./Entradas.css";
 
 class Entradas extends React.Component {
@@ -10,6 +10,7 @@ class Entradas extends React.Component {
       sub_enc_checkbox: true,
       tem_sim_checkbox: true,
       genetic_checkbox: true,
+      best_param: false,
       temp_tem_sim: "",
       resf_tem_sim: "",
       tam_populacao: "",
@@ -49,24 +50,68 @@ class Entradas extends React.Component {
       });
     } else {
       this.setState({ [target.name]: target.value }, () => {
-        this.setState({
-          error: validate(this.state)
-        });
+        this.setState(
+          {
+            error: validate(this.state)
+          },
+          () => {
+            this.handleError(this.state.error);
+          }
+        );
       });
     }
   }
 
   handleToggle({ target }) {
-    this.setState({
-      [target.name]: !this.state[target.name]
-    });
+    this.setState(
+      {
+        [target.name]: !this.state[target.name]
+      },
+      () => {
+        if (target.name === "best_param") {
+          this.setState(
+            {
+              error: validate(this.state)
+            },
+            () => {
+              this.handleError(this.state.error);
+            }
+          );
+        }
+      }
+    );
+  }
+
+  componentWillReceiveProps() {
+    if (this.props.paramGenetico !== undefined) {
+      if (
+        Object.keys(this.props.paramGenetico).length !== 0 &&
+        this.props.paramGenetico.constructor === Object
+      ) {
+        let { pop, mut, elit, ger } = this.props.paramGenetico;
+        this.setState({
+          tam_populacao: pop,
+          prob_mutacao: mut,
+          elitismo: elit,
+          num_geracoes: ger
+        });
+      }
+    }
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   handleSubmit() {
-    this.setState({ error: validate(this.state) }, () => {
-      this.verificaError()
-        ? this.props.busca(this.state)
-        : this.handleError(this.state.error);
+    this.setState({ error: validate(this.state) }, async function() {
+      if (this.verificaError()) {
+        await this.props.loading();
+        await this.sleep(1);
+        this.props.busca(this.state);
+      } else {
+        this.handleError(this.state.error);
+      }
     });
   }
 
@@ -74,7 +119,7 @@ class Entradas extends React.Component {
     return (
       <div className="entradas">
         <div className="ui form">
-          <div className="three fields">
+          <div className="four fields">
             <div className="field">
               <label>Subida de Encosta</label>
               <div className="ui toggle checkbox">
@@ -91,19 +136,32 @@ class Entradas extends React.Component {
             </div>
             <div className="field">
               <label>Têmpera Simulada</label>
-              <div
-                className={`field ${
-                  this.state.error.temp_tem_sim ? "error" : ""
-                }`}
-              >
+              <div className="ui toggle checkbox">
                 <input
-                  type="number"
-                  name="temp_tem_sim"
-                  disabled={!this.state.tem_sim_checkbox}
-                  placeholder="Temperatura"
-                  value={this.state.temp_tem_sim}
-                  onChange={this.handleChange}
+                  type="checkbox"
+                  className="checkbox"
+                  name="tem_sim_checkbox"
+                  defaultChecked={true}
+                  value={this.state.tem_sim_checkbox}
+                  onClick={this.handleToggle}
                 ></input>
+                <label>Habilitar/Desabilitar</label>
+              </div>
+              <div className="first_line">
+                <div
+                  className={`field ${
+                    this.state.error.temp_tem_sim ? "error" : ""
+                  }`}
+                >
+                  <input
+                    type="number"
+                    name="temp_tem_sim"
+                    disabled={!this.state.tem_sim_checkbox}
+                    placeholder="Temperatura"
+                    value={this.state.temp_tem_sim}
+                    onChange={this.handleChange}
+                  ></input>
+                </div>
               </div>
               <div
                 className={`field ${
@@ -119,74 +177,9 @@ class Entradas extends React.Component {
                   onChange={this.handleChange}
                 ></input>
               </div>
-              <div className="ui toggle checkbox">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  name="tem_sim_checkbox"
-                  defaultChecked={true}
-                  value={this.state.tem_sim_checkbox}
-                  onClick={this.handleToggle}
-                ></input>
-                <label>Habilitar/Desabilitar</label>
-              </div>
             </div>
             <div className="field">
               <label>Algoritmo Genético</label>
-              <div
-                className={`field ${
-                  this.state.error.tam_populacao ? "error" : ""
-                }`}
-              >
-                <input
-                  type="number"
-                  name="tam_populacao"
-                  disabled={!this.state.genetic_checkbox}
-                  placeholder="Tamanho População"
-                  value={this.state.tam_populacao}
-                  onChange={this.handleChange}
-                ></input>
-              </div>
-              <div
-                className={`field ${
-                  this.state.error.prob_mutacao ? "error" : ""
-                }`}
-              >
-                <input
-                  type="number"
-                  name="prob_mutacao"
-                  disabled={!this.state.genetic_checkbox}
-                  placeholder="Prob. Mutação"
-                  value={this.state.prob_mutacao}
-                  onChange={this.handleChange}
-                ></input>
-              </div>
-              <div
-                className={`field ${this.state.error.elitismo ? "error" : ""}`}
-              >
-                <input
-                  type="number"
-                  name="elitismo"
-                  disabled={!this.state.genetic_checkbox}
-                  placeholder="Elitistmo"
-                  value={this.state.elitismo}
-                  onChange={this.handleChange}
-                ></input>
-              </div>
-              <div
-                className={`field ${
-                  this.state.error.num_geracoes ? "error" : ""
-                }`}
-              >
-                <input
-                  type="number"
-                  name="num_geracoes"
-                  disabled={!this.state.genetic_checkbox}
-                  placeholder="Numero Gerações"
-                  value={this.state.num_geracoes}
-                  onChange={this.handleChange}
-                ></input>
-              </div>
               <div className="ui toggle checkbox">
                 <input
                   type="checkbox"
@@ -198,29 +191,112 @@ class Entradas extends React.Component {
                 ></input>
                 <label>Habilitar/Desabilitar</label>
               </div>
+              <div className="ui form">
+                <div className="two fields">
+                  <div className="field">
+                    <div className="first_line">
+                      <div
+                        className={`field ${
+                          this.state.error.tam_populacao ? "error" : ""
+                        }`}
+                      >
+                        <input
+                          type="number"
+                          name="tam_populacao"
+                          disabled={!this.state.genetic_checkbox}
+                          placeholder="População"
+                          value={this.state.tam_populacao}
+                          onChange={this.handleChange}
+                        ></input>
+                      </div>
+                    </div>
+                    <div
+                      className={`field ${
+                        this.state.error.prob_mutacao ? "error" : ""
+                      }`}
+                    >
+                      <input
+                        type="number"
+                        name="prob_mutacao"
+                        disabled={!this.state.genetic_checkbox}
+                        placeholder="Mutação"
+                        value={this.state.prob_mutacao}
+                        onChange={this.handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="field">
+                    <div className="first_line">
+                      <div
+                        className={`field ${
+                          this.state.error.elitismo ? "error" : ""
+                        }`}
+                      >
+                        <input
+                          type="number"
+                          name="elitismo"
+                          disabled={!this.state.genetic_checkbox}
+                          placeholder="Elitistmo"
+                          value={this.state.elitismo}
+                          onChange={this.handleChange}
+                        ></input>
+                      </div>
+                    </div>
+                    <div
+                      className={`field ${
+                        this.state.error.num_geracoes ? "error" : ""
+                      }`}
+                    >
+                      <input
+                        type="number"
+                        name="num_geracoes"
+                        disabled={!this.state.genetic_checkbox}
+                        placeholder="Gerações"
+                        value={this.state.num_geracoes}
+                        onChange={this.handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                </div>
+                <div className="ui toggle checkbox">
+                  <input
+                    type="checkbox"
+                    className="checkbox_"
+                    name="best_param"
+                    defaultChecked={false}
+                    value={this.state.best_param}
+                    onClick={this.handleToggle}
+                  ></input>
+                  <label>Selecionar Melhor Aut.</label>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="ui input">
-            <div
-              className={`field ${this.state.error.quantidade ? "error" : ""}`}
-            >
-              <label>
-                Quantidade de Repetições
-                <input
-                  type="number"
-                  name="quantidade"
-                  className="input_qtd"
-                  placeholder="Quantidade"
-                  value={this.state.quantidade}
-                  onChange={this.handleChange}
-                ></input>
-              </label>
+            <div className="field">
+              <label>Quantidade de Repetições</label>
+              <div className="first_line">
+                <div
+                  className={`field ${
+                    this.state.error.quantidade ? "error" : ""
+                  }`}
+                >
+                  <div className="field_quantidades">
+                    <input
+                      type="number"
+                      name="quantidade"
+                      className="input_qtd"
+                      placeholder="Quantidade"
+                      value={this.state.quantidade}
+                      onChange={this.handleChange}
+                    ></input>
+                  </div>
+                </div>
+              </div>
+              <button className="ui button" onClick={this.handleSubmit}>
+                Calcular
+              </button>
             </div>
           </div>
         </div>
-        <button className="ui button" onClick={this.handleSubmit}>
-          Calcular
-        </button>
         <div className="ui error message" hidden={this.verificaError()}>
           <ul className="list">{this.state.error_list}</ul>
         </div>

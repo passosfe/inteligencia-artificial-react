@@ -65,7 +65,7 @@ class TableView extends React.Component {
               : false
           }
         >
-          <h2>1 Lugar</h2>
+          <h2>1º Lugar</h2>
           <div>{this.state.first_place.place_type}</div>
           <div>{this.state.first_place.place_cost}</div>
           <table className="ui celled table">
@@ -81,7 +81,7 @@ class TableView extends React.Component {
               : false
           }
         >
-          <h2>2 Lugar</h2>
+          <h2>2º Lugar</h2>
           <div>{this.state.second_place.place_type}</div>
           <div>{this.state.second_place.place_cost}</div>
           <table className="ui celled table">
@@ -97,7 +97,7 @@ class TableView extends React.Component {
               : false
           }
         >
-          <h2>3 Lugar</h2>
+          <h2>3º Lugar</h2>
           <div>{this.state.third_place.place_type}</div>
           <div>{this.state.third_place.place_cost}</div>
           <table className="ui celled table">

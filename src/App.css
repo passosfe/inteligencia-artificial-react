@@ -9,9 +9,10 @@ h3 {
 }
 
 .entradas {
-  width: 50%;
+  width: 70%;
   margin: 0 auto;
   text-align: center;
+  z-index: 9;
 }
 
 .menu {
@@ -27,18 +28,79 @@ h3 {
 }
 
 .navbar {
-  background-color: white;
+  color: white;
   width: 100%;
-  padding: 10px;
+  /* padding: 10px; */
   position: fixed;
   top: 0;
   transition: top 0.6s;
+  font-family: sans-serif;
 }
 
 .navbar--hidden {
-  top: -170px;
+  background-color: rgb(0, 66, 128);
+  top: -200px;
 }
 
 body {
-  padding-top: 400px;
+  padding-top: 450px;
+  color: white;
+  z-index: 99;
+  background-color: rgb(0, 66, 128);
+}
+
+.box {
+  position: fixed;
+  top: 0;
+  z-index: -1;
+  transform: rotate(80deg);
+  left: 0;
+}
+
+.wave {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0.4;
+  position: absolute;
+  top: 3%;
+  left: 10%;
+  background: #0af;
+  width: 1500px;
+  height: 1300px;
+  margin-left: -150px;
+  margin-top: -250px;
+  transform-origin: 50% 48%;
+  border-radius: 43%;
+  animation: drift 7000ms infinite linear;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  from {
+    transform: rotate(360deg);
+  }
+}
+
+.wave.-one {
+  animation: rotate 7000ms infinite linear;
+  opacity: 0.1;
+  background: #0af;
+}
+
+.wave.-two {
+  animation: rotate 3000ms infinite linear;
+  opacity: 0.1;
+  background: black;
+}
+
+.wave.-three {
+  animation: rotate 7500ms infinite linear;
+  background-color: #77daff;
+}
+
+.line {
+  z-index: 1;
 }

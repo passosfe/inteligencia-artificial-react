@@ -23,30 +23,6 @@ const tipos = {
   3: "Algoritmo Genético"
 };
 
-// function imprimir_horarios(horarios) {
-//   var voo = -1;
-//   var resposta = [];
-
-//   for (var i = 0; i < horarios.length / 2; i++) {
-//     const { nome, origem } = pessoas[i];
-//     voo += 1;
-//     let ida = voos[`${origem}_${destino}`][horarios[voo]];
-//     voo += 1;
-//     let volta = voos[`${destino}_${origem}`][horarios[voo]];
-//     resposta.push({
-//       nome: nome,
-//       origem: origem,
-//       ida_hora_saida: ida.hora_saida,
-//       ida_hora_chegada: ida.hora_chegada,
-//       ida_preco: ida.preco,
-//       volta_hora_saida: volta.hora_saida,
-//       volta_hora_chegada: volta.hora_chegada,
-//       volta_preco: volta.preco
-//     });
-//   }
-//   return resposta;
-// }
-
 function imprimir_paradas(info, paradas) {
   const { distancias, passageiros, pontos } = info;
   let tempo;
@@ -90,7 +66,7 @@ function imprimir_paradas(info, paradas) {
       }
     }
 
-    let passageiro = indice;
+    let passageiro = passageiros_aux[indice].nome;
     let local = pontos[paradas[i]];
 
     //if (!passageiros_aux[indice].saiu) {
@@ -123,6 +99,16 @@ function preenche_passageiros(distancias) {
   var origens = [];
   var destinos = [];
   var localidades_aux = [...localidades];
+  const nomes = [
+    "Anderson",
+    "Marcela",
+    "Laís",
+    "Marcos",
+    "Fernando",
+    "Andréia",
+    "Lucas",
+    "Katia"
+  ];
   let passageiros = [];
 
   for (let i = 0; i < localidades.length / 2; i++) {
@@ -141,8 +127,10 @@ function preenche_passageiros(distancias) {
       distancias[`${origem}_${destino}`] * 2
     );
     //criar hora de chamar o uber
+    let nome = nomes[i];
 
     passageiros.push({
+      nome,
       origem,
       destino,
       chegada_esperada
@@ -236,7 +224,7 @@ function subida_encosta(info) {
 
     for (let i = 0; i < resposta.length; i++) {
       if (i !== escolhido) {
-        let arr = JSON.parse(JSON.stringify(resposta));
+        let arr = [...resposta];
         [arr[i], arr[escolhido]] = [arr[escolhido], arr[i]];
         vizinhos.push(arr);
       }
@@ -380,6 +368,51 @@ function genetico(info, tam_populacao, prob_mutacao, elit, num_geracoes) {
   return arr_custos[0][1];
 }
 
+//Professor, aqui está a função que encontra os melhores parametros para o algoritmo genetico.
+function best_genetico_aux(info) {
+  var respostas = [];
+  const populacao = [10, 15, 25, 30];
+  const t_mutacao = [0.1, 0.2, 0.3, 0.4];
+  const elitismo = [0.05, 0.1, 0.15, 0.2];
+  const geracoes = [70, 100, 140, 170];
+
+  for (let pop = 0; pop < populacao.length; pop++) {
+    for (let mut = 0; mut < t_mutacao.length; mut++) {
+      for (let elit = 0; elit < elitismo.length; elit++) {
+        for (let ger = 0; ger < geracoes.length; ger++) {
+          let entradas = {
+            pop: populacao[pop],
+            mut: t_mutacao[mut],
+            elit: elitismo[elit],
+            ger: geracoes[ger]
+          };
+          let resultado = genetico(
+            info,
+            populacao[pop],
+            t_mutacao[mut],
+            elitismo[elit],
+            geracoes[ger]
+          );
+          respostas.push([custo(info, resultado), entradas, resultado]);
+        }
+      }
+    }
+  }
+
+  respostas.sort((a, b) => a[0] - b[0]);
+
+  var saida = [
+    respostas[0][0],
+    {
+      melhor: respostas[0][2],
+      custos: [respostas[0][0]],
+      tipo: tipos[3]
+    },
+    { params: respostas[0][1] }
+  ];
+  return saida;
+}
+
 function busca_aux(
   tipo,
   repeticoes,
@@ -418,6 +451,7 @@ export function executa_busca(inputs) {
     sub_enc_checkbox,
     tem_sim_checkbox,
     genetic_checkbox,
+    best_param,
     temp_tem_sim,
     resf_tem_sim,
     tam_populacao,
@@ -426,22 +460,26 @@ export function executa_busca(inputs) {
     num_geracoes
   } = inputs;
   var resultados = [];
+  var qtd_opcoes = 0;
 
   const distancias = preenche_distancias();
   const { passageiros, pontos } = preenche_passageiros(distancias);
   const info = { distancias, passageiros, pontos };
 
   if (sub_enc_checkbox) {
+    qtd_opcoes++;
     resultados.push(busca_aux(1, quantidade, info, subida_encosta));
   }
 
   if (tem_sim_checkbox) {
+    qtd_opcoes++;
     resultados.push(
       busca_aux(2, quantidade, info, temp_sim, temp_tem_sim, resf_tem_sim)
     );
   }
 
-  if (genetic_checkbox) {
+  if (genetic_checkbox && !best_param) {
+    qtd_opcoes++;
     resultados.push(
       busca_aux(
         3,
@@ -454,6 +492,9 @@ export function executa_busca(inputs) {
         num_geracoes
       )
     );
+  } else if (genetic_checkbox && best_param) {
+    qtd_opcoes++;
+    resultados.push(best_genetico_aux(info));
   }
 
   var resultados_ordenados = [...resultados];
@@ -484,9 +525,13 @@ export function executa_busca(inputs) {
   var saida = {
     ranking_caminhos: ranking_caminhos,
     grafico: {
-      labels: labels,
-      datasets: datasets
+      labels,
+      datasets
     }
   };
+
+  if (genetic_checkbox && best_param) {
+    saida.params_genetico = resultados[qtd_opcoes - 1][2].params;
+  }
   return saida;
 }

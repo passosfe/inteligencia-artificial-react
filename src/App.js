@@ -4,6 +4,7 @@ import { executa_busca } from "./Algoritmos";
 import Entradas from "./Entradas";
 import { Line } from "react-chartjs-2";
 import TableView from "./TableView";
+import Loader from "./Loader";
 
 class App extends React.Component {
   constructor(props) {
@@ -14,19 +15,29 @@ class App extends React.Component {
         datasets: []
       },
       results: [],
-      visible: true
+      visible: true,
+      params_genetico: {},
+      loading: false
     };
 
     this.busca_solucao = this.busca_solucao.bind(this);
+    this.startLoading = this.startLoading.bind(this);
   }
 
   busca_solucao(qtd) {
     let resultado = executa_busca(qtd);
+    let params_genetico = {};
+    if (resultado.params_genetico !== undefined) {
+      params_genetico = resultado.params_genetico;
+    }
 
     this.setState(
       {
-        results: resultado.ranking_caminhos
+        results: resultado.ranking_caminhos,
+        params_genetico,
+        loading: false
       },
+
       () => {
         this.setState({
           grafico: {
@@ -74,12 +85,16 @@ class App extends React.Component {
   handleScroll = () => {
     let visible;
 
-    window.pageYOffset === 0 ? (visible = true) : (visible = false);
+    window.pageYOffset <= 0 ? (visible = true) : (visible = false);
 
     this.setState({
       visible
     });
   };
+
+  startLoading() {
+    this.setState({ loading: true });
+  }
 
   componentDidMount() {
     window.addEventListener("scroll", this.handleScroll);
@@ -87,6 +102,21 @@ class App extends React.Component {
 
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
+  }
+
+  resultado() {
+    return (
+      <div className="resultado">
+        <TableView data={this.state.results}></TableView>
+        <div
+          className="line"
+          hidden={this.state.grafico.datasets.length === 0 ? true : false}
+        >
+          <h2>Comparativo de tentativas</h2>
+          <Line options={{ responsive: true }} data={this.getChartData}></Line>
+        </div>
+      </div>
+    );
   }
 
   render() {
@@ -97,16 +127,17 @@ class App extends React.Component {
         >
           <h1>Trabalho de Inteligência Artificial</h1>
           <h3>Preencha as opções necessárias</h3>
-          <Entradas busca={this.busca_solucao}></Entradas>
+          <Entradas
+            busca={this.busca_solucao}
+            paramGenetico={this.state.params_genetico}
+            loading={this.startLoading}
+          ></Entradas>
         </nav>
-        <div className="resultado">
-          <TableView data={this.state.results}></TableView>
-          <div hidden={this.state.grafico.datasets.length === 0 ? true : false}>
-            <Line
-              options={{ responsive: true }}
-              data={this.getChartData}
-            ></Line>
-          </div>
+        <div>{this.state.loading ? <Loader /> : this.resultado()}</div>
+        <div className="box">
+          <div className="wave -one"></div>
+          <div className="wave -two"></div>
+          <div className="wave -three"></div>
         </div>
       </div>
     );
